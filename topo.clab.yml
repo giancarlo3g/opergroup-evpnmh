@@ -1,0 +1,52 @@
+name: opergroup
+prefix: ""
+
+topology:
+  defaults:
+    kind: nokia_sros
+  kinds:
+    nokia_sros:
+      image: registry.srlinux.dev/pub/nokia_sros:24.10.R1 
+      license: ../license-sros24.txt
+    linux:
+      image: ghcr.io/mfzhsn/network-multitool-sshd:0.0.2
+  nodes: 
+    r1: #IXR-X1
+      kind: nokia_sros
+      type: >-
+          cp: cpu=2 ram=3 slot=A chassis=IXR-X card=imm32-qsfp28+4-qsfpdd ___ 
+          lc: cpu=2 ram=4 max_nics=36 slot=1 chassis=IXR-X card=imm32-qsfp28+4-qsfpdd mda/1=m32-qsfp28+4-qsfpdd
+      # startup-config: ./config/r1.cfg
+    r2: #IXR-X1
+      kind: nokia_sros
+      type: >-
+          cp: cpu=2 ram=3 slot=A chassis=IXR-X card=imm32-qsfp28+4-qsfpdd ___ 
+          lc: cpu=2 ram=4 max_nics=36 slot=1 chassis=IXR-X card=imm32-qsfp28+4-qsfpdd mda/1=m32-qsfp28+4-qsfpdd
+      # startup-config: ./config/r2.cfg
+    olt: # SR-1x
+      kind: nokia_sros
+      type: sr-1x-48d
+      # startup-config: ./config/olt.cfg
+    tpots: # SR-1x
+      kind: nokia_sros
+      type: sr-1x-48d
+      # startup-config: ./config/tpots.cfg
+    host1: # connected to tpots
+      kind: linux
+      exec:
+        - ifconfig eth1 192.168.1.1
+        - ifconfig eth1 netmask 255.255.255.0
+    host2: # connected to olt
+      kind: linux
+      exec:
+        - ifconfig eth1 192.168.2.2
+        - ifconfig eth1 netmask 255.255.255.0
+   
+  links:
+    - endpoints: ["r1:eth1", "r2:eth1"]
+    - endpoints: ["r1:eth2", "tpots:eth1"]
+    - endpoints: ["r2:eth2", "tpots:eth2"]
+    - endpoints: ["r1:eth3", "olt:eth1"]
+    - endpoints: ["r2:eth3", "olt:eth2"]
+    - endpoints: ["tpots:eth3", "host1:eth1"]
+    - endpoints: ["olt:eth3", "host2:eth1"]
