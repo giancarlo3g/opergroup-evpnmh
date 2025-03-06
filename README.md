@@ -6,4 +6,4 @@ This lab uses EVPN-MH All-Active.
 
 ### Topology
 
-![Topology](./topo.clab.png)
+![Topology](topo.clab.png)
